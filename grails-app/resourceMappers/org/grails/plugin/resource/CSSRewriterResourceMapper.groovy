@@ -33,17 +33,25 @@ class CSSRewriterResourceMapper {
         def resURI = resource.sourceUrl
 
         def processor = new CSSLinkProcessor()
-        processor.process(resource, grailsResourceProcessor) { prefix, originalUrl, suffix ->
-            
+        processor.process(resource, grailsResourceProcessor) { prefix, originalUrl, suffix ->			
             if (originalUrl.startsWith('resource:')) {
                 def uri = originalUrl - 'resource:'
                 
+				def uriPath = uri
+				def uriQuery = null
+				
+				int startOfQuery = uri.indexOf('?') 
+				if (startOfQuery >= 0) {
+					uriPath = uri.substring(0, startOfQuery)
+					uriQuery = uri.substring(startOfQuery+1)
+				}
+				
                 if (log.debugEnabled) {
-                    log.debug "Calculated URI of CSS resource [$originalUrl] as [$uri]"
+                    log.debug "Calculated URI of CSS resource [$originalUrl] as [$uriPath]"
                 }
 
                 // This triggers the processing chain if necessary for any resource referenced by the CSS
-                def linkedToResource = grailsResourceProcessor.getResourceMetaForURI(uri, true, resURI) { res ->
+                def linkedToResource = grailsResourceProcessor.getResourceMetaForURI(uriPath, true, resURI) { res ->
                     // If there's no decl for the resource, create it with image disposition
                     // otherwise we may pop out as a favicon...
                     res.disposition = 'cssresource'
@@ -55,6 +63,9 @@ class CSSRewriterResourceMapper {
                     }
 
                     def fixedUrl = linkedToResource.relativeToWithQueryParams(resource)
+					if (uriQuery) {
+						fixedUrl += "?${uriQuery}"
+					}
                     def replacement = "${prefix}${fixedUrl}${suffix}"
 
                     if (log.debugEnabled) {

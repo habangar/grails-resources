@@ -86,7 +86,10 @@ class ResourceTagLib {
         jpg:[rel:'shortcut icon'],
         png:[rel:'shortcut icon'],
         ico:[rel:'shortcut icon'],
-        appleicon:[rel:'apple-touch-icon']
+        appleicon:[rel:'apple-touch-icon'],
+		
+        eot:[rel:'font'],
+        ttf:[rel:'font'],
     ]
     
     def grailsResourceProcessor
